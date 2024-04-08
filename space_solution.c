@@ -9,11 +9,9 @@
 //distance_from_mixer = crows flies distance to target planet
 //*ship_state = storage structure
 
-//
 
 struct ship_state_struct {
-    int *number_of_planets_visited; //number of overall visited planets
-    unsigned int *visited_planets;
+    int number_of_planets_visited; //number of overall visited planets
 };
 
 ShipAction space_hop(unsigned int crt_planet,
@@ -27,12 +25,22 @@ ShipAction space_hop(unsigned int crt_planet,
     printf("Current planet: %u\n", crt_planet);
     printf("Number of connections: %d\n", num_connections);
 
-    struct ship_state_struct data = {};
+    //create a ship state if nothing exists
+    if (ship_state == NULL){
+        printf("Ship state is null\n");
+        struct ship_state_struct data = {1};
+        struct ship_state_struct *state = &data;
+        printf("Number of planets visited: %d\n", state->number_of_planets_visited);
+        struct ship_action next_action = {RAND_PLANET, state};
+        return next_action;
+    }
 
 
+    struct ship_state_struct *state = (struct ship_state_struct *) &ship_state;
+    state->number_of_planets_visited += 1;
 
+    printf("Number of planets visited: %d\n",state->number_of_planets_visited);
 
-
-
-
+    struct ship_action next_action = {RAND_PLANET, state};
+    return next_action;
 }

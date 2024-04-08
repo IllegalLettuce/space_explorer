@@ -253,7 +253,7 @@ int main(int argc, char *argv[]) {
     if (found_treasure){
         printf("Congratulations you found it in %d hops!\n", num_hops);
     }else{
-        printf("The hyper-engine dies, you're lost in space. Welp, there is always the airlock...\n");
+        printf("The hyper-engine dies, you're lost in space\n");
     }
 
     // Free allocated memory
