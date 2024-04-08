@@ -12,7 +12,8 @@
 //
 
 struct ship_state_struct {
-    int number_of_planets_visited; //number of overall visited planets
+    int *number_of_planets_visited; //number of overall visited planets
+    unsigned int *visited_planets;
 };
 
 ShipAction space_hop(unsigned int crt_planet,
@@ -26,19 +27,12 @@ ShipAction space_hop(unsigned int crt_planet,
     printf("Current planet: %u\n", crt_planet);
     printf("Number of connections: %d\n", num_connections);
 
-    struct ship_state_struct data = {1};
+    struct ship_state_struct data = {};
 
-    if (ship_state == NULL){
-        printf("Ship state is null\n");
-        struct ship_state_struct *state = &data;
-        ship_state = state;
-        struct ship_action next_action = {RAND_PLANET,ship_state};
-        return next_action;
-    }else{
-        struct ship_state_struct *state = ship_state;
-        state->number_of_planets_visited++;
-        printf("Number of planets visited: %d\n", state->number_of_planets_visited);
-        struct ship_action next_action = {RAND_PLANET,state};
-        return next_action;
-    }
+
+
+
+
+
+
 }
