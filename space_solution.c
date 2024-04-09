@@ -36,7 +36,8 @@ ShipAction space_hop(unsigned int crt_planet, //Current planet
         state->planets_seen[0] = *connections;
 
         //All visited planets
-        state->planets_visited = malloc((state->number_of_planets_visited)* sizeof(unsigned int));
+        state->planets_visited = malloc((state->number_of_planets_visited + 1)* sizeof(unsigned int));
+        state->planets_visited[0] = crt_planet;
 
         printf("Number of planets visited: %d\n", state->number_of_planets_visited);
         struct ship_action next_action = {RAND_PLANET, state};
@@ -58,6 +59,7 @@ ShipAction space_hop(unsigned int crt_planet, //Current planet
                                (state->number_of_planets_seen+num_connections) * sizeof(unsigned int));
     if (planets_temp_ptr != NULL){
         state->planets_seen = planets_temp_ptr;
+        free(planets_temp_ptr);
     }else{
         printf("Something went wrong with the realloc for planets_seen;\n");
     }
@@ -68,9 +70,11 @@ ShipAction space_hop(unsigned int crt_planet, //Current planet
                                    (state->number_of_planets_visited+1) * sizeof(unsigned int));
     if (planets_visited_temp != NULL){
         state->planets_visited = planets_visited_temp;
+        free(planets_visited_temp);
     }else{
         printf("Something went wrong with the realloc for planets_visited;\n");
     }
+
 
 
 
