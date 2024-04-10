@@ -12,11 +12,11 @@ struct ship_state_struct {
     unsigned int *planets_visited;                  //Pointer to array of visited planets
     double *distances_of_planets_visited;           //Pointer to array of distances of visited planets
 
-    int jump_logic;
-    int index;
-    unsigned int *connections_to_check;
-    int num_connections_to_check;
-    double *distances_of_connections;
+    int jump_logic;                                 //Jump logic bool
+    int index;                                      //index for sweep
+    unsigned int *connections_to_check;             //Array of connections for the sweep
+    int num_connections_to_check;                   //Number of connections to sweep
+    double *distances_of_connections;               //distances of the planets in the sweep
 };
 
 ShipAction space_hop(unsigned int crt_planet,       //Current planet
