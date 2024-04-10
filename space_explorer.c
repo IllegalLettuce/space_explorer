@@ -223,6 +223,7 @@ int main(int argc, char *argv[]) {
         free(connections);
         // Find next planet
         if (next_planet == RAND_PLANET){
+
             int rand_jump;
             rand_jump = (int)(drand48()*num_points);
             crt = &planets[rand_jump];
@@ -245,6 +246,7 @@ int main(int argc, char *argv[]) {
             }
         }
         if (crt == treasure){
+            printf("Treasure ID: %u\n", treasure->planet_id);             //
             found_treasure = 1;
             break;
         }

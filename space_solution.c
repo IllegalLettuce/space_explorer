@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#define TARGET_DISTANCE 6
+#define TARGET_DISTANCE 7
 
 //Ship database. A structure that hold all the information
 struct ship_state_struct {
@@ -41,7 +41,7 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         state->number_of_planets_visited = 1;
         state->planets_visited = malloc((state->number_of_planets_visited)* sizeof(unsigned int));
         state->planets_visited[0] = crt_planet;
-        state->distances_of_planets_visited = malloc((state->number_of_planets_visited)* sizeof(double));
+        state->distances_of_planets_visited = malloc((state->number_of_planets_visited)*sizeof(double));
         state->distances_of_planets_visited[0] = distance_from_mixer;
 
         printf("Number of planets visited: %d\n", state->number_of_planets_visited);
@@ -74,9 +74,9 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
     }
 
     //Dollar store Dijkstra's algo
-
     unsigned int next_planet = RAND_PLANET;
 
+    //Initial random jumps
     if ((distance_from_mixer > TARGET_DISTANCE) && (state->start == 1)){
         printf("Not good enough\n");
         struct ship_action next_action = {RAND_PLANET, state};
@@ -94,13 +94,37 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         state->jump_logic = 1;
         printf("Start loop\n");
     }
-
+    //Sweep
     if (state->jump_logic == 1){
         if (state->index < state->num_connections_to_check){
-            state->distances_of_planets_visited[state->index] = distance_from_mixer;
-            next_planet = state->connections_to_check[state->index+1];
-            state->index++;
+            int visited_before = 0;
+            for (int index = 0; index < state->number_of_planets_visited;index++){
+                for (int inner_index = 0; inner_index < state->num_connections_to_check; inner_index++){
+                    if (state->planets_visited[index] == state->connections_to_check[inner_index]){
+                        visited_before += 1;
+                        if (visited_before == 2){
+                            printf("Planet %u/%d is seen at %u/%d\n",state->connections_to_check[inner_index], inner_index,
+                                   state->planets_visited[index], index);
+                        }
+                    }
+                }
+            }
+
+            if (visited_before != 2){
+                state->distances_of_planets_visited[state->index] = distance_from_mixer;
+                next_planet = state->connections_to_check[state->index+1];
+                state->index++;
+                printf("Added planet to list\n");
+            }
+
+            if (visited_before==2){
+                state->index += 2;
+            }
+
+
+
             printf("Jumping through connections %d/%d:\n", state->index,state->num_connections_to_check);
+            printf("Next planet: %u\n", next_planet);
         }else{
             double lowest_distance = TARGET_DISTANCE;
             int index_lowest_distance = 0;
@@ -115,26 +139,7 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
             state->jump_logic = 0;
             state->index = 0;
         }
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     //Next Jump
