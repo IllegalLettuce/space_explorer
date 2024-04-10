@@ -27,6 +27,7 @@ struct ship_state_struct {
     unsigned int *connections_to_check;             //Array of connections for the sweep
     int num_connections_to_check;                   //Number of connections to sweep
     double *distances_of_connections;               //distances of the planets in the sweep
+    unsigned int second_lowest_planet;
 };
 
 ShipAction space_hop(unsigned int crt_planet,       //Current planet
@@ -60,7 +61,7 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
     }
     //============================================Refresh database======================================================
     struct ship_state_struct *state = ship_state;
-    unsigned int next_planet = crt_planet; //failsafe
+    unsigned int next_planet;
 
     //Check if the planet has been visited before
     int visited_before = is_planet_in_array(state->planets_visited,
@@ -100,7 +101,6 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         state->num_connections_to_check = 0;
         state->connections_to_check = malloc(num_connections * sizeof(unsigned int));
         state->distances_of_connections = malloc(num_connections * sizeof(double));
-        state->jump_logic = 1;
         printf("Start loop\n");
     //====================================================GATHER DATA===================================================
         for (int index = 0; index < num_connections; index++) {
@@ -124,13 +124,14 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
             }
         }
         printf("Information gathered\n");
+        if (state->num_connections_to_check == 0){
+            printf("No unique planets found\n");
+            struct ship_action next_action = {RAND_PLANET, state};
+            return next_action;
+        }
         state->jump_logic = 2;
-
-
-
-
-
-
+        struct ship_action next_action = {state->connections_to_check[0], state};
+        return next_action;
 
     }
     //==================================================CHECK PLANETS===================================================
@@ -158,6 +159,4 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         struct ship_action next_action = {next_planet, state};
         return next_action;
     }
-    struct ship_action next_action = {next_planet, state};
-    return next_action;
 }
