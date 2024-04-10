@@ -15,3 +15,4 @@ cmake-build-debug/.ninja_log
 cmake-build-debug/CMakeFiles/space_explorer.dir/space_solution.c.obj
 cmake-build-debug/space_explorer.exe
 cmake-build-debug/Testing/Temporary/LastTest.log
+/cmake-build-debug

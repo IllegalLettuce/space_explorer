@@ -105,12 +105,13 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         printf("Start loop\n");
     //====================================================GATHER DATA===================================================
     }else if (state->jump_logic == 1){
-        state->num_connections_to_check++;
+
         for (int index = 0; index < num_connections; index++) {
             int result = is_planet_in_array(state->planets_visited,
                                             state->number_of_planets_visited,
                                             connections[index]);
             if (result == -1) {
+                state->num_connections_to_check++;//flag
                 printf("Planet %u is unique\n", connections[index]);
                 unsigned int *temp_ptr_connections;
                 double *temp_ptr_distances;
@@ -120,6 +121,7 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
                                              (state->num_connections_to_check) * sizeof(double));
                 state->connections_to_check = temp_ptr_connections;
                 state->distances_of_connections = temp_ptr_distances;
+                state->connections_to_check[state->num_connections_to_check-1]=connections[state->num_connections_to_check-1];
             } else {
                 printf("Planet %u is NOT unique\n", connections[index]);
             }
@@ -132,9 +134,24 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         state->distances_of_connections[state->index] = distance_from_mixer;
         next_planet = state->connections_to_check[state->index];
         state->index++;
-        printf("Checking planet %d of %d\n",state->index, state->num_connections_to_check);
+        printf("Checking planet %d/%d\n",state->index, state->num_connections_to_check);
+        struct ship_action next_action = {next_planet, state};
+        return next_action;
     }else{
-        printf("Some error occured\n");
+        state->jump_logic = 0;
+        state->index = 0;
+        double lowest_distance = 10.0;
+        int lowest_index;
+        for (int index = 0; index < state->num_connections_to_check; index++){
+            if (state->distances_of_connections[index] < lowest_distance){
+                lowest_distance = state->distances_of_connections[index];
+                lowest_index = index;
+            }
+        }
+        next_planet = state->connections_to_check[lowest_index];
+        printf("Lowest distance is %f for planet ID:%u\n", lowest_distance, next_planet);
+        struct ship_action next_action = {next_planet, state};
+        return next_action;
     }
 
 
