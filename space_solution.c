@@ -2,13 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#define RANDOM_JUMP_AMOUNT 5
+#define TARGET_DISTANCE 5
 
 //Ship database. A structure that hold all the information
 struct ship_state_struct {
     int number_of_planets_visited;                  //number of overall visited planets
     unsigned int *planets_visited;                  //Pointer to array of visited planets
-    double *distances_of_planets_visited;
+    double *distances_of_planets_visited;           //Pointer to array of distances of visited planets
+
+    int jump_logic;
+    int index;
+    unsigned int *connections_to_check;
+    int num_connections_to_check;
+    double *distances_of_connections;
 };
 
 ShipAction space_hop(unsigned int crt_planet,       //Current planet
@@ -26,6 +32,9 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
     if (ship_state == NULL){
         printf("Ship state is null\n");
         struct ship_state_struct *state = malloc(sizeof(struct ship_state_struct));
+
+        state->jump_logic = 0;
+        state->index = 0;
 
         state->number_of_planets_visited = 1;
         state->planets_visited = malloc((state->number_of_planets_visited)* sizeof(unsigned int));
@@ -74,11 +83,46 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
 
     unsigned int next_planet = RAND_PLANET;
 
-    if (distance_from_mixer > 5){
+    if (distance_from_mixer > TARGET_DISTANCE){
         printf("Not good enough\n");
         struct ship_action next_action = {RAND_PLANET, state};
         return next_action;
     }
+
+
+    //start sweep
+    if (state->jump_logic == 0){
+        state->connections_to_check = malloc(num_connections * sizeof(unsigned int));
+        state->distances_of_connections = malloc(num_connections * sizeof(double));
+        state->connections_to_check = connections;
+        state->num_connections_to_check = num_connections;
+        state->jump_logic = 1;
+    }
+
+    if (state->jump_logic == 1){
+        state->index = 0;
+        if (state->index < state->num_connections_to_check){
+            state->distances_of_planets_visited[state->index] = distance_from_mixer;
+            next_planet = state->connections_to_check[state->index];
+            state->index++;
+        }else{
+            double lowest_distance = TARGET_DISTANCE;
+            int index_lowest_distance = 0;
+            for (int index = 0; index < state->num_connections_to_check; index++){
+                if (state->distances_of_planets_visited[index] > lowest_distance){
+                    lowest_distance = state->distances_of_planets_visited[index];
+                    index_lowest_distance = index;
+                }
+            }
+            next_planet = state->connections_to_check[index_lowest_distance];
+        }
+
+    }
+
+
+
+
+
 
 
 
