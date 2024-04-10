@@ -74,14 +74,6 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
     }
 
     //Dollar store Dijkstra's algo
-    //From each planet, save connections and num_connections check
-    //Substructure????
-    //N random jumps (optimise)
-    //Jump through each connection in order and save distances to array
-    //index of array of distances correspond to array of connections
-    //find the shortest distance
-    //jump to planet
-    //repeat
 
     unsigned int next_planet = RAND_PLANET;
 
@@ -100,7 +92,7 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         state->connections_to_check = connections;
         state->num_connections_to_check = num_connections;
         state->jump_logic = 1;
-        printf("Start/Reset loop\n");
+        printf("Start loop\n");
     }
 
     if (state->jump_logic == 1){
@@ -108,8 +100,7 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
             state->distances_of_planets_visited[state->index] = distance_from_mixer;
             next_planet = state->connections_to_check[state->index+1];
             state->index++;
-            printf("Gathering information:\n");
-
+            printf("Jumping through connections %d/%d:\n", state->index,state->num_connections_to_check);
         }else{
             double lowest_distance = TARGET_DISTANCE;
             int index_lowest_distance = 0;
@@ -122,6 +113,7 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
             next_planet = state->connections_to_check[index_lowest_distance];
             printf("Go to next planet id:%u that is %f away from target\n",next_planet, lowest_distance);
             state->jump_logic = 0;
+            state->index = 0;
         }
 
     }
