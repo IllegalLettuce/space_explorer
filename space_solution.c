@@ -3,9 +3,46 @@
 #include <string.h>
 #include <stdio.h>
 #define TARGET_DISTANCE 7
+//return planet in array second closest to target
+
+unsigned int second_closest_in_array_to_target(const unsigned int *array_planets,
+                                               const double* array_distances,
+                                               int arrays_len){
+    double closest = array_distances[0];
+    double sec_closest = 100.0;
+    unsigned int second_closest_planet = 0;
+    for (int index=0; index < arrays_len; index++){
+        if(array_distances[index] < closest){
+            closest = array_distances[index];
+        }
+    }
+    for (int index=0; index < arrays_len; index++){
+        if(array_distances[index] != closest && array_distances[index] < sec_closest){
+            sec_closest = array_distances[index];
+            second_closest_planet = array_planets[index];
+        }
+    }
+    return second_closest_planet;
+}
+//return planet in array closest to the target
+unsigned int closest_planet_in_array_to_target(const unsigned int *array_planets,
+                                               const double* array_distances,
+                                               int arrays_len){
+    double lowest_distance = 100.0;
+    int lowest_index;
+    for (int index = 0; index < arrays_len; index++){
+        if (array_distances[index] < lowest_distance){
+            lowest_distance = array_distances[index];
+            lowest_index = index;
+        }
+    }
+    return array_planets[lowest_index];
+}
 
 //Checks if the planet is in the array. Returns index if it is, and -1 if not
-int is_planet_in_array(const unsigned int *array, int array_len, double planet_id){
+int is_planet_in_array(const unsigned int *array,
+                       int array_len,
+                       double planet_id){
     for (int index = 0; index < array_len; index++){
         if (array[index] == planet_id){
             return index;
@@ -16,18 +53,18 @@ int is_planet_in_array(const unsigned int *array, int array_len, double planet_i
 
 //Ship database. A structure that hold all the information
 struct ship_state_struct {
-    int start;                                      //Start pseudo boolean
+    int random_jumps_on;                            //Random jumps pseudo boolean
 
-    int number_of_planets_visited;                  //number of overall visited planets
-    unsigned int *planets_visited;                  //Pointer to array of visited planets
-    double *distances_of_planets_visited;           //Pointer to array of distances of visited planets
+    int number_of_planets_visited;                  //number of overall unique visited planets
+    unsigned int *planets_visited;                  //Pointer to array of unique visited planets
+    double *distances_of_planets_visited;           //Pointer to array of distances of unique visited planets
 
     int jump_logic;                                 //Jump logic pseudo bool
     int index;                                      //index for sweep
     unsigned int *connections_to_check;             //Array of connections for the sweep
     int num_connections_to_check;                   //Number of connections to sweep
     double *distances_of_connections;               //distances of the planets in the sweep
-    unsigned int second_lowest_planet;
+    unsigned int second_lowest_planet;              //Second-closest planet to target
 };
 
 ShipAction space_hop(unsigned int crt_planet,       //Current planet
@@ -41,12 +78,12 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
     printf("Current planet: %u\n", crt_planet);
     printf("Number of connections: %d\n", num_connections);
 
-    //create a ship state if nothing exist. On spawn basically.
+    //===============================================START==============================================================
     if (ship_state == NULL){
         printf("Ship state is null\n");
         struct ship_state_struct *state = malloc(sizeof(struct ship_state_struct));
 
-        state->start = 1;
+        state->random_jumps_on = 1;
         state->jump_logic = 0;
         state->index = 0;
         state->number_of_planets_visited = 1;
@@ -63,12 +100,10 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
     struct ship_state_struct *state = ship_state;
     unsigned int next_planet;
 
-    //Check if the planet has been visited before
+    //============================================CHECK PLANET STATUS===================================================
     int visited_before = is_planet_in_array(state->planets_visited,
                                             state->number_of_planets_visited,
                                             crt_planet);
-
-    //==================================If not visited, add to list=====================================================
     if (visited_before == -1){
         printf("This planet is new, added to list\n");
         state->number_of_planets_visited += 1;
@@ -90,12 +125,12 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
     }
     printf("Number of unique planets visited: %d\n",state->number_of_planets_visited);
     //===========================================INITIAL RANDOM JUMPS===================================================
-    if ((distance_from_mixer > TARGET_DISTANCE) && (state->start == 1)){
-        //printf("Not good enough\n");
+    if ((distance_from_mixer > TARGET_DISTANCE) && (state->random_jumps_on == 1)){
         struct ship_action next_action = {RAND_PLANET, state};
         return next_action;
     }
-    state->start = 0;
+    state->random_jumps_on = 0;
+
     //===================================================START SWEEP====================================================
     if (state->jump_logic == 0){
         state->num_connections_to_check = 0;
@@ -126,13 +161,22 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         printf("Information gathered\n");
         if (state->num_connections_to_check == 0){
             printf("No unique planets found\n");
-            struct ship_action next_action = {RAND_PLANET, state};
-            return next_action;
+            if (state->second_lowest_planet != 0){
+                printf("Backtracking\n");
+                state->jump_logic = 1;
+                struct ship_action next_action = {state->second_lowest_planet, state};
+                return next_action;
+            }else{
+                printf("Commencing random planet jumps\n");
+                state->random_jumps_on = 1;
+                state->jump_logic = 2;
+                struct ship_action next_action = {RAND_PLANET, state};
+                return next_action;
+            }
         }
         state->jump_logic = 2;
         struct ship_action next_action = {state->connections_to_check[0], state};
         return next_action;
-
     }
     //==================================================CHECK PLANETS===================================================
     else if ((state->index < state->num_connections_to_check)&&(state->jump_logic == 2)){
@@ -145,17 +189,22 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
     }else{
         state->jump_logic = 0;
         state->index = 0;
-        double lowest_distance = 10.0;
-        int lowest_index;
-        for (int index = 0; index < state->num_connections_to_check; index++){
-            if (state->distances_of_connections[index] < lowest_distance){
-                lowest_distance = state->distances_of_connections[index];
-                lowest_index = index;
+        next_planet = closest_planet_in_array_to_target(state->connections_to_check,
+                                                        state->distances_of_connections,
+                                                        state->num_connections_to_check);
+        if (state->num_connections_to_check > 1){
+            unsigned int temp;
+            temp = second_closest_in_array_to_target(state->connections_to_check,
+                                                     state->distances_of_connections,
+                                                     state->num_connections_to_check);
+            if (temp != 0){
+                state->second_lowest_planet = temp;
             }
         }
-        printf("Lowest index %d\n", lowest_index);
-        next_planet = state->connections_to_check[lowest_index];
-        printf("Lowest distance is %f for planet ID:%u\n", lowest_distance, next_planet);
+
+        printf("Lowest distance is planet ID:%u\n", next_planet);
+
+        printf("Backup planet is planet ID:%u\n", state->second_lowest_planet);
         struct ship_action next_action = {next_planet, state};
         return next_action;
     }
