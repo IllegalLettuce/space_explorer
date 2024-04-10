@@ -120,7 +120,7 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
             }
 
             if (visited_before != 1){
-                state->distances_of_planets_visited[state->index] = distance_from_mixer;
+                state->distances_of_connections[state->index] = distance_from_mixer;
                 next_planet = state->connections_to_check[state->index+1];
                 state->index++;
                 printf("Added planet to list\n");
@@ -138,8 +138,8 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
             double lowest_distance = TARGET_DISTANCE;
             int index_lowest_distance = 0;
             for (int index = 0; index < state->num_connections_to_check; index++){
-                if (state->distances_of_planets_visited[index] < lowest_distance){
-                    lowest_distance = state->distances_of_planets_visited[index];
+                if (state->distances_of_connections[index] < lowest_distance){
+                    lowest_distance = state->distances_of_connections[index];
                     index_lowest_distance = index;
                 }
             }
