@@ -2,10 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#define TARGET_DISTANCE 5
+#define TARGET_DISTANCE 6
 
 //Ship database. A structure that hold all the information
 struct ship_state_struct {
+    int start;
+
     int number_of_planets_visited;                  //number of overall visited planets
     unsigned int *planets_visited;                  //Pointer to array of visited planets
     double *distances_of_planets_visited;           //Pointer to array of distances of visited planets
@@ -33,9 +35,9 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         printf("Ship state is null\n");
         struct ship_state_struct *state = malloc(sizeof(struct ship_state_struct));
 
+        state->start = 1;
         state->jump_logic = 0;
         state->index = 0;
-
         state->number_of_planets_visited = 1;
         state->planets_visited = malloc((state->number_of_planets_visited)* sizeof(unsigned int));
         state->planets_visited[0] = crt_planet;
@@ -83,12 +85,13 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
 
     unsigned int next_planet = RAND_PLANET;
 
-    if (distance_from_mixer > TARGET_DISTANCE){
+    if ((distance_from_mixer > TARGET_DISTANCE) && (state->start == 1)){
         printf("Not good enough\n");
         struct ship_action next_action = {RAND_PLANET, state};
         return next_action;
     }
-
+    state->start = 0;
+    printf("Random jumps finished\n");
 
     //start sweep
     if (state->jump_logic == 0){
@@ -97,24 +100,28 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         state->connections_to_check = connections;
         state->num_connections_to_check = num_connections;
         state->jump_logic = 1;
+        printf("Start/Reset loop\n");
     }
 
     if (state->jump_logic == 1){
-        state->index = 0;
         if (state->index < state->num_connections_to_check){
             state->distances_of_planets_visited[state->index] = distance_from_mixer;
-            next_planet = state->connections_to_check[state->index];
+            next_planet = state->connections_to_check[state->index+1];
             state->index++;
+            printf("Gathering information:\n");
+
         }else{
             double lowest_distance = TARGET_DISTANCE;
             int index_lowest_distance = 0;
             for (int index = 0; index < state->num_connections_to_check; index++){
-                if (state->distances_of_planets_visited[index] > lowest_distance){
+                if (state->distances_of_planets_visited[index] < lowest_distance){
                     lowest_distance = state->distances_of_planets_visited[index];
                     index_lowest_distance = index;
                 }
             }
             next_planet = state->connections_to_check[index_lowest_distance];
+            printf("Go to next planet id:%u that is %f away from target\n",next_planet, lowest_distance);
+            state->jump_logic = 0;
         }
 
     }
