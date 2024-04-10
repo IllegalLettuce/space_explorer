@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#define TARGET_DISTANCE 7
+#define TARGET_DISTANCE 6
 
 //Ship database. A structure that hold all the information
 struct ship_state_struct {
@@ -96,7 +96,10 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
     }
     //Sweep
     if (state->jump_logic == 1){
+
+        //Gather information
         if (state->index < state->num_connections_to_check){
+            //Check if we have visited the planet before
             int visited_before = 0;
             for (int index = 0; index < state->number_of_planets_visited;index++){
                 for (int inner_index = 0; inner_index < state->num_connections_to_check; inner_index++){
@@ -119,13 +122,15 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
 
             if (visited_before==2){
                 state->index += 2;
+                next_planet = state->connections_to_check[state->index+2];
             }
 
 
 
             printf("Jumping through connections %d/%d:\n", state->index,state->num_connections_to_check);
             printf("Next planet: %u\n", next_planet);
-        }else{
+
+        }else{ //Find the lowest distance in array and go there
             double lowest_distance = TARGET_DISTANCE;
             int index_lowest_distance = 0;
             for (int index = 0; index < state->num_connections_to_check; index++){
