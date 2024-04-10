@@ -4,6 +4,16 @@
 #include <stdio.h>
 #define TARGET_DISTANCE 6
 
+//Checks if the planet is in the array. Returns index if it is, and -1 if not
+double is_planet_in_array(const unsigned int *array, int array_len, double planet_id){
+    for (int index = 0; index < array_len; index++){
+        if (array[index] == planet_id){
+            return index;
+        }
+    }
+    return -1;
+}
+
 //Ship database. A structure that hold all the information
 struct ship_state_struct {
     int start;
@@ -105,7 +115,8 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
     if (state->jump_logic == 1){
         //Gather information
         if (state->index < state->num_connections_to_check){
-            //Check if we have visited the planet before
+
+            //Check if we have visited the planet before==============================================borken
             visited_before = 0;
             for (int index = 0; index < state->number_of_planets_visited;index++){
                 for (int inner_index = 0; inner_index < state->num_connections_to_check; inner_index++){
