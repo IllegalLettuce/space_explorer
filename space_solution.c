@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#define TARGET_DISTANCE 5
+#define TARGET_DISTANCE 7
 
 //Checks if the planet is in the array. Returns index if it is, and -1 if not
 int is_planet_in_array(const unsigned int *array, int array_len, double planet_id){
@@ -97,6 +97,7 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
     state->start = 0;
     //===================================================START SWEEP====================================================
     if (state->jump_logic == 0){
+        state->num_connections_to_check = 0;
         state->connections_to_check = malloc(num_connections * sizeof(unsigned int));
         state->distances_of_connections = malloc(num_connections * sizeof(double));
         state->jump_logic = 1;
@@ -145,12 +146,12 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
                 lowest_index = index;
             }
         }
+        printf("Lowest index %d\n", lowest_index);
         next_planet = state->connections_to_check[lowest_index];
         printf("Lowest distance is %f for planet ID:%u\n", lowest_distance, next_planet);
         struct ship_action next_action = {next_planet, state};
         return next_action;
     }
-        printf("Nothing can be done===================================================================\n");
-//    struct ship_action next_action = {state->connections_to_check[0], state};
-//    return next_action;
+    struct ship_action next_action = {next_planet, state};
+    return next_action;
 }
