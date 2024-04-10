@@ -59,6 +59,7 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
     //Add each planet and its distance to the ships database
     unsigned int *planets_visited_temp;
     double *distance_planet_temp;
+
     planets_visited_temp = realloc(state->planets_visited,
                                    (state->number_of_planets_visited) * sizeof(unsigned int));
     distance_planet_temp = realloc(state->distances_of_planets_visited,
