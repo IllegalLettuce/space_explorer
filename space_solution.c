@@ -53,38 +53,44 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
     struct ship_state_struct *state = ship_state;
 
     //The planets_visited
-    state->number_of_planets_visited += 1;
-    printf("Number of planets visited: %d\n",state->number_of_planets_visited);
-
-    //Add each planet and its distance to the ships database
-    unsigned int *planets_visited_temp;
-    double *distance_planet_temp;
-
-    planets_visited_temp = realloc(state->planets_visited,
-                                   (state->number_of_planets_visited) * sizeof(unsigned int));
-    distance_planet_temp = realloc(state->distances_of_planets_visited,
-                                   (state->number_of_planets_visited) * sizeof(double));
-    if ((planets_visited_temp != NULL) && (distance_planet_temp != NULL)){
-        state->planets_visited = planets_visited_temp;
-        state->distances_of_planets_visited = distance_planet_temp;
-        state->planets_visited[state->number_of_planets_visited-1] = crt_planet;
-        state->distances_of_planets_visited[state->number_of_planets_visited-1] = distance_from_mixer;
-
-    }else{
-        printf("Something went wrong with the realloc;\n");
+    int visited_before = 0;
+    for (int index = 0; index < state->number_of_planets_visited; index++){
+        if (state->planets_visited[index] == crt_planet){
+            visited_before = 1;
+            printf("Have been on planet %u\n", crt_planet);
+        }
     }
+    if (visited_before == 0){
+        printf("Check\n");
+        state->number_of_planets_visited += 1;
+        unsigned int *planets_visited_temp;
+        double *distance_planet_temp;
+        planets_visited_temp = realloc(state->planets_visited,
+                                       (state->number_of_planets_visited) * sizeof(unsigned int));
+        distance_planet_temp = realloc(state->distances_of_planets_visited,
+                                       (state->number_of_planets_visited) * sizeof(double));
+        if ((planets_visited_temp != NULL) && (distance_planet_temp != NULL)){
+            state->planets_visited = planets_visited_temp;
+            state->distances_of_planets_visited = distance_planet_temp;
+            state->planets_visited[state->number_of_planets_visited-1] = crt_planet;
+            state->distances_of_planets_visited[state->number_of_planets_visited-1] = distance_from_mixer;
 
-    //Dollar store Dijkstra's algo
-    unsigned int next_planet = RAND_PLANET;
+        }else{
+            printf("Something went wrong with the realloc;\n");
+        }
+    }
+    printf("Number of unique planets visited: %d\n",state->number_of_planets_visited);
+
+
+    unsigned int next_planet = 0;
 
     //Initial random jumps
     if ((distance_from_mixer > TARGET_DISTANCE) && (state->start == 1)){
-        printf("Not good enough\n");
+        //printf("Not good enough\n");
         struct ship_action next_action = {RAND_PLANET, state};
         return next_action;
     }
     state->start = 0;
-    printf("Random jumps finished\n");
 
     //start sweep
     if (state->jump_logic == 0){
@@ -97,36 +103,33 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
     }
     //Sweep
     if (state->jump_logic == 1){
-
         //Gather information
         if (state->index < state->num_connections_to_check){
             //Check if we have visited the planet before
-            int visited_before = 0;
+            visited_before = 0;
             for (int index = 0; index < state->number_of_planets_visited;index++){
                 for (int inner_index = 0; inner_index < state->num_connections_to_check; inner_index++){
                     if (state->planets_visited[index] == state->connections_to_check[inner_index]){
                         visited_before += 1;
-                        if (visited_before == 2){
-                            printf("Planet %u/%d is seen at %u/%d\n",state->connections_to_check[inner_index], inner_index,
-                                   state->planets_visited[index], index);
-                        }
+                    }
+                    if (visited_before == 1){
+                        printf("Planet %u/%d is seen at %u/%d\n",state->connections_to_check[inner_index], inner_index,
+                               state->planets_visited[index], index);
                     }
                 }
             }
 
-            if (visited_before != 2){
+            if (visited_before != 1){
                 state->distances_of_planets_visited[state->index] = distance_from_mixer;
                 next_planet = state->connections_to_check[state->index+1];
                 state->index++;
                 printf("Added planet to list\n");
             }
 
-            if (visited_before==2){
+            if (visited_before==1){
                 state->index += 2;
                 next_planet = state->connections_to_check[state->index+2];
             }
-
-
 
             printf("Jumping through connections %d/%d:\n", state->index,state->num_connections_to_check);
             printf("Next planet: %u\n", next_planet);
