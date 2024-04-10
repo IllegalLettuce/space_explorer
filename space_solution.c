@@ -103,7 +103,6 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         state->jump_logic = 1;
         printf("Start loop\n");
     //====================================================GATHER DATA===================================================
-    }else if (state->jump_logic == 1){
         for (int index = 0; index < num_connections; index++) {
             int result = is_planet_in_array(state->planets_visited,
                                             state->number_of_planets_visited,
@@ -126,6 +125,13 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         }
         printf("Information gathered\n");
         state->jump_logic = 2;
+
+
+
+
+
+
+
     }
     //==================================================CHECK PLANETS===================================================
     else if ((state->index < state->num_connections_to_check)&&(state->jump_logic == 2)){
