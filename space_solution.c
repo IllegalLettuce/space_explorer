@@ -136,6 +136,7 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         state->num_connections_to_check = 0;
         state->connections_to_check = malloc(num_connections * sizeof(unsigned int));
         state->distances_of_connections = malloc(num_connections * sizeof(double));
+
         printf("Start loop\n");
     //====================================================GATHER DATA===================================================
         for (int index = 0; index < num_connections; index++) {
@@ -143,7 +144,7 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
                                             state->number_of_planets_visited,
                                             connections[index]);
             if (result == -1) {
-                state->num_connections_to_check++;//flag
+                state->num_connections_to_check++;
                 printf("Planet %u is unique\n", connections[index]);
                 unsigned int *temp_ptr_connections;
                 double *temp_ptr_distances;
@@ -162,14 +163,16 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         if (state->num_connections_to_check == 0){
             printf("No unique planets found\n");
             if (state->second_lowest_planet != 0){
-                printf("Backtracking\n");
-                state->jump_logic = 1;
+                printf("Backtracking to %u\n", state->second_lowest_planet);
+                state->jump_logic = 2;
+                state->index = 0;
                 struct ship_action next_action = {state->second_lowest_planet, state};
                 return next_action;
             }else{
                 printf("Commencing random planet jumps\n");
                 state->random_jumps_on = 1;
                 state->jump_logic = 2;
+                state->index = 0;
                 struct ship_action next_action = {RAND_PLANET, state};
                 return next_action;
             }
@@ -197,6 +200,7 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
             temp = second_closest_in_array_to_target(state->connections_to_check,
                                                      state->distances_of_connections,
                                                      state->num_connections_to_check);
+            printf("Found second closest: %u\n", temp);
             if (temp != 0){
                 state->second_lowest_planet = temp;
             }
