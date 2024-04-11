@@ -13,6 +13,20 @@ int is_planet_in_array(const unsigned int *array, int array_len, double planet_i
     }
     return -1;
 }
+//return planet in array closest to the target
+unsigned int closest_planet_in_array_to_target(const unsigned int *array_planets,
+                                               const double* array_distances,
+                                               int arrays_len){
+    double lowest_distance = 100.0;
+    int lowest_index;
+    for (int index = 0; index < arrays_len; index++){
+        if (array_distances[index] < lowest_distance){
+            lowest_distance = array_distances[index];
+            lowest_index = index;
+        }
+    }
+    return array_planets[lowest_index];
+}
 
 //Ship database. A structure that hold all the information
 struct ship_state_struct {
@@ -137,7 +151,7 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
     }else{
         state->jump_logic = 0;
         state->index = 0;
-        double lowest_distance = 10.0;
+        double lowest_distance = 10.00;
         int lowest_index;
         for (int index = 0; index < state->num_connections_to_check; index++){
             if (state->distances_of_connections[index] < lowest_distance){
@@ -150,7 +164,8 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         struct ship_action next_action = {next_planet, state};
         return next_action;
     }
-
-    struct ship_action next_action = {state->connections_to_check[0], state};
+    printf("No other scenarios apply, random jump\n");
+    state->start = 1;
+    struct ship_action next_action = {RAND_PLANET, state};
     return next_action;
 }
