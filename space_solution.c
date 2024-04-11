@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#define TARGET_DISTANCE 6
+#define TARGET_DISTANCE 8
 
 //Checks if the planet is in the array. Returns index if it is, and -1 if not
 int is_planet_in_array(const unsigned int *array, int array_len, double planet_id){
@@ -117,6 +117,7 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         printf("Start loop\n");
         //====================================================GATHER DATA===================================================
     }else if (state->jump_logic == 1){
+        state->num_connections_to_check = 0;
         for (int index = 0; index < num_connections; index++) {
             int result = is_planet_in_array(state->planets_visited,
                                             state->number_of_planets_visited,
@@ -139,6 +140,8 @@ ShipAction space_hop(unsigned int crt_planet,       //Current planet
         }
         printf("Information gathered\n");
         state->jump_logic = 2;
+        struct ship_action next_action = {state->connections_to_check[0], state};   //========================chanhged
+        return next_action;
     }
         //==================================================CHECK PLANETS===================================================
     else if ((state->index < state->num_connections_to_check)&&(state->jump_logic == 2)){
